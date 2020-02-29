@@ -4,6 +4,8 @@
    Copyright (C) 2005 Intel Co.
 	Contributed by Fenghua Yu <fenghua.yu@intel.com>.
 
+   Copyright (C) 2020 Fredrik Holmqvist
+
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -59,19 +61,5 @@ _start:
 	call efi_main
 	addq $8, %rsp
 
-.exit:	
+.exit:
   	ret
-
- 	// hand-craft a dummy .reloc section so EFI knows it's a relocatable executable:
- 
- 	.data
-dummy:	.long	0
-
-#define IMAGE_REL_ABSOLUTE	0
- 	.section .reloc, "a"
-label1:
-	.long	dummy-label1				// Page RVA
- 	.long	10					// Block Size (2*4+2)
-	.word	(IMAGE_REL_ABSOLUTE<<12) +  0		// reloc for dummy
-
-
