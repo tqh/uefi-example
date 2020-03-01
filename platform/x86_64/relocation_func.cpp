@@ -45,16 +45,12 @@ extern "C" efi_status _relocate (long ldbase, Elf64_Dyn *dyn,
 		      efi_system_table *systab __attribute__((__unused__)))
 {
 	long relsz = 0, relent = 0;
-	Elf64_Rel *rel = 0;
-	unsigned long *addr;
-	int i;
+	Elf64_Rel *rel = NULL;
 
-	for (i = 0; dyn[i].d_tag != DT_NULL; ++i) {
+	for (int i = 0; dyn[i].d_tag != DT_NULL; ++i) {
 		switch (dyn[i].d_tag) {
 			case DT_RELA:
-				rel = (Elf64_Rel*)
-					((unsigned long)dyn[i].d_un.d_ptr
-					 + ldbase);
+				rel = (Elf64_Rel*) ((unsigned long)dyn[i].d_un.d_ptr + ldbase);
 				break;
 
 			case DT_RELASZ:
@@ -64,36 +60,28 @@ extern "C" efi_status _relocate (long ldbase, Elf64_Dyn *dyn,
 			case DT_RELAENT:
 				relent = dyn[i].d_un.d_val;
 				break;
-
-			default:
-				break;
 		}
 	}
 
-        if (!rel && relent == 0)
-                return EFI_SUCCESS;
+	if (rel == NULL && relent == 0)
+		return EFI_SUCCESS;
 
-	if (!rel || relent == 0)
+	if (rel == NULL || relent == 0)
 		return EFI_LOAD_ERROR;
 
 	while (relsz > 0) {
 		/* apply the relocs */
 		switch (ELF64_R_TYPE (rel->r_info)) {
-			case R_X86_64_NONE:
-				break;
-
-			case R_X86_64_RELATIVE:
-				addr = (unsigned long *)
+			case R_X86_64_RELATIVE: {
+				unsigned long *addr = (unsigned long *)
 					(ldbase + rel->r_offset);
 				*addr += ldbase;
-				break;
-
-			default:
-				break;
+			} break;
+			case R_X86_64_NONE:
+				;
 		}
 		rel = (Elf64_Rel*) ((char *) rel + relent);
 		relsz -= relent;
 	}
 	return EFI_SUCCESS;
 }
-
