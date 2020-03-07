@@ -121,7 +121,7 @@ typedef struct efi_simple_text_output_protocol {
   efi_status (*Reset)(struct efi_simple_text_output_protocol* self,
                       bool extended_verification) EFIAPI;
 
-  efi_status (*OutputString)(struct efi_simple_text_output_protocol* self, char16_t* string) EFIAPI;
+  efi_status (*OutputString)(struct efi_simple_text_output_protocol* self, const char16_t* string) EFIAPI;
 
   efi_status (*TestString)(struct efi_simple_text_output_protocol* self, char16_t* string) EFIAPI;
 
