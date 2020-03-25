@@ -17,8 +17,7 @@ extern void (*__ctor_list)(void);
 extern void (*__ctor_end)(void);
 
 static void
-call_ctors(void)
-{
+call_ctors(void) {
 	void (**f)(void);
 
 	for (f = &__ctor_list; f < &__ctor_end; f++)
@@ -26,34 +25,34 @@ call_ctors(void)
 }
 
 static void print(uint32_t value) {
-  char16_t output[32];
-  char16_t *ptr = output;
-  if (value == 0) {
- 		out->OutputString(out, u"0");
-    return;
-  }
+	char16_t output[32];
+	char16_t *ptr = output;
+	if (value == 0) {
+		out->OutputString(out, u"0");
+		return;
+	}
 
-  ptr += 31;
-  *--ptr = 0;
-  uint32_t tmp = value;
+	ptr += 31;
+	*--ptr = 0;
+	uint32_t tmp = value;
 
-  while (tmp) {
-    *--ptr = '0' + tmp % 10;
-    tmp /= 10;
-  }
-  //if (value < 0) *--ptr = '-';
-  out->OutputString(out, ptr);
+	while (tmp) {
+		*--ptr = '0' + tmp % 10;
+		tmp /= 10;
+	}
+	//if (value < 0) *--ptr = '-';
+	out->OutputString(out, ptr);
 }
 
 static efi_status fail(efi_status status, const char16_t*  msg) {
-  switch(status) {
+	switch(status) {
 		case EFI_BUFFER_TOO_SMALL:
 			out->OutputString(out, u"BUFFER TOO SMALL"); break;
 		case EFI_UNSUPPORTED:
 			out->OutputString(out, u"UNSUPPORTED"); break;
 		default:
 			print(status); break;
-  }
+	}
 
 	out->OutputString(out, u": ");
 	out->OutputString(out, msg);
@@ -63,7 +62,7 @@ static efi_status fail(efi_status status, const char16_t*  msg) {
 
 static void printGPT(efi_partition_info_protocol* partitionInfo, efi_block_io_protocol* blockIO) {
 	out->OutputString(out, u"GPT: ");
-//  out->OutputString(out, partitionInfo->Info.Gpt.PartitionName);
+	//out->OutputString(out, partitionInfo->Info.Gpt.PartitionName);
 }
 
 static void printMBR(efi_partition_info_protocol* partitionInfo, efi_block_io_protocol* blockIO) {
@@ -76,15 +75,14 @@ static void printOther(efi_partition_info_protocol* partitionInfo, efi_block_io_
 
 
 extern "C" efi_status
-efi_main(efi_handle image, efi_system_table *system)
-{
+efi_main(efi_handle image, efi_system_table *system) {
 	call_ctors();
 
-  bs = system->BootServices;
+	bs = system->BootServices;
 	out = system->ConOut;
 
 	efi_block_io_protocol *blockIo;
-  efi_partition_info_protocol *partitionInfo;
+	efi_partition_info_protocol *partitionInfo;
 
 	size_t memSize = 0;
 	efi_status status;
@@ -98,7 +96,7 @@ efi_main(efi_handle image, efi_system_table *system)
 
 	efi_handle handles[noOfHandles];
 	status = bs->LocateHandle(ByProtocol, &BlockIoGUID, 0, &memSize, handles);
-  if (status != EFI_SUCCESS)
+	if (status != EFI_SUCCESS)
 		return fail(status, u"Failed to locate block devices!");
 
 	// All block devices has one for the disk and one per partition
@@ -109,15 +107,16 @@ efi_main(efi_handle image, efi_system_table *system)
 		status = bs->HandleProtocol(handles[n], &BlockIoGUID, (void**)&blockIo);
 		if (status != EFI_SUCCESS)
 			return fail(status, u"Cannot get block device handle!");
+
 		status = bs->HandleProtocol(handles[n], &PartitionInfoGUID, (void**)&partitionInfo);
 		if (status == EFI_UNSUPPORTED ) {
 			fail(status, u"Unsupported for partition");
 			continue;
 		}
- 		if (status != EFI_SUCCESS)
+		if (status != EFI_SUCCESS)
 			return fail(status, u"Cannot get partition info handle!");
 
-	  switch (partitionInfo->Type) {
+		switch (partitionInfo->Type) {
 			case PARTITION_TYPE_GPT:
 				printGPT(partitionInfo, blockIo);
 				break;
@@ -130,10 +129,10 @@ efi_main(efi_handle image, efi_system_table *system)
 			default:
 				return fail(EFI_UNSUPPORTED, u"Unknown partition type!");
 		}
-  }
-//	size_t index;
-  //u string prefix for char16_t
-//  system->ConOut->OutputString(system->ConOut, u"Hello World!\r\n");
-//  system->BootServices->WaitForEvent(1, &system->ConIn->WaitForKey, &index);
+	}
+	//	size_t index;
+	//u string prefix for char16_t
+	//  system->ConOut->OutputString(system->ConOut, u"Hello World!\r\n");
+	//  system->BootServices->WaitForEvent(1, &system->ConIn->WaitForKey, &index);
 	return EFI_SUCCESS;
 }
