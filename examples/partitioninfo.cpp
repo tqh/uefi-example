@@ -106,10 +106,6 @@ efi_main(efi_handle image, efi_system_table *system) {
 	if (status != EFI_SUCCESS)
 		return fail(status, u"Failed to locate partition info!");
 
-	// All block devices has one for the disk and one per partition
-	// There is a special case for a device with one fixed partition
-	// But we probably do not care about booting on that kind of device
-	// So find all disk block devices and let Haiku do partition scan
 	for (size_t n = 0; n < noOfHandles; n++) {
 		status = bs->HandleProtocol(handles[n], &PartitionInfoGUID, (void**)&partitionInfo);
 		if (status != EFI_SUCCESS)
@@ -129,9 +125,5 @@ efi_main(efi_handle image, efi_system_table *system) {
 				return fail(EFI_UNSUPPORTED, u"Unknown partition type!");
 		}
 	}
-	//	size_t index;
-	//u string prefix for char16_t
-	//  system->ConOut->OutputString(system->ConOut, u"Hello World!\r\n");
-	//  system->BootServices->WaitForEvent(1, &system->ConIn->WaitForKey, &index);
 	return EFI_SUCCESS;
 }
