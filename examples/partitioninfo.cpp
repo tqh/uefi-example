@@ -16,8 +16,7 @@ extern void (*__ctor_list)(void);
 extern void (*__ctor_end)(void);
 
 static void
-call_ctors(void)
-{
+call_ctors(void) {
 	void (**f)(void);
 
 	for (f = &__ctor_list; f < &__ctor_end; f++)
