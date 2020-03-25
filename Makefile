@@ -7,7 +7,7 @@ ARCH := x86_64
 
 %.efi: %.so
   #Mine
-	objcopy -j .peheader -j .text -j .sdata -j .data -j .dynamic -j .dynsym \
+	objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym \
       -j .rel -j .rela -j .reloc -S --target=$(FORMAT) $^ $@
 
 %.so: platform/$(ARCH)/relocation_func.o platform/$(ARCH)/start_func.o examples/%.o
