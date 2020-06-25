@@ -8,9 +8,9 @@
 extern "C" efi_status
 efi_main(efi_handle image, efi_system_table *system)
 {
-	size_t index;
+  size_t index;
   //u string prefix for char16_t
   system->ConOut->OutputString(system->ConOut, u"Hello World!\r\n");
   system->BootServices->WaitForEvent(1, &system->ConIn->WaitForKey, &index);
-	return EFI_SUCCESS;
+  return EFI_SUCCESS;
 }
